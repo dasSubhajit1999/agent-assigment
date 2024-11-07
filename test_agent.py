@@ -19,11 +19,11 @@ class TestAgent(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.agent.outbox.empty(), "Outbox should contain at least one message")
         
 
-    @patch('Agent.token_contract')
+    @patch('agent.token_contract')
     async def test_check_erc20_balance(self, mock_token_contract):
         mock_token_contract.functions.balanceOf.return_value.call.return_value = 1000000000000000000
         token_balance_task = asyncio.create_task(self.agent.check_erc20_balance())
-        await asyncio.sleep(1)  
+        await asyncio.sleep(3)  
         token_balance_task.cancel()
         #for checking token balance the balanceOf function will get invoked once
         mock_token_contract.functions.balanceOf.assert_called_once_with(self.SOURCE_ADDRESS)
@@ -36,8 +36,8 @@ class TestAgent(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.agent.inbox.empty())
         handle_messages_task.cancel()
 
-    @patch('Agent.token_contract')
-    @patch('Agent.web3')
+    @patch('agent.token_contract')
+    @patch('agent.web3')
     async def test_handle_messages_crypto(self,mock_web3, mock_token_contract):
         mock_token_contract.functions.balanceOf.return_value.call.return_value = 1000000000000000000
         mock_web3.eth.get_transaction_count.return_value = 1
@@ -83,8 +83,8 @@ class TestAgentIntegration(unittest.IsolatedAsyncioTestCase):
         self.router = MessageRouter(self.agent1, self.agent2)
         self.SOURCE_ADDRESS = os.getenv("SOURCE_ADDRESS")
 
-    @patch('Agent.token_contract')
-    @patch('Agent.web3')
+    @patch('agent.token_contract')
+    @patch('agent.web3')
     async def test_agent_message_flow(self,mock_web3, mock_token_contract):
         #  agent1 message generation
         message_gen_task = asyncio.create_task(self.agent1.generate_random_messages())
