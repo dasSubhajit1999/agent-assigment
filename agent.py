@@ -56,7 +56,6 @@ class Agent:
 
     async def check_erc20_balance(self):
         while True:
-            await asyncio.sleep(10)
             try:
                 balance = token_contract.functions.balanceOf(SOURCE_ADDRESS).call()
                 print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} ERC-20 Balance: {balance/ (10 ** token_decimals)} tokens")
@@ -64,6 +63,7 @@ class Agent:
                 print("Error: The Ethereum address provided is invalid.")
             except Exception as e:
                 print(f"An unexpected error occurred while checking the balance: {e}")
+            await asyncio.sleep(10)
              
 
 
