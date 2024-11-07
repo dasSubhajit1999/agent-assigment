@@ -80,7 +80,7 @@ This project demonstrates an autonomous agent system where agents communicate as
 To start the agents and the message routing system:
 
 ```bash
-python Main.py
+python main.py
 ```
 
 - **Agent 1** (named "ALICE") generates random messages every 2 seconds.
