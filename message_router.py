@@ -1,5 +1,5 @@
 import asyncio
-from Agent import Agent
+from agent import Agent
 
 class MessageRouter:
 

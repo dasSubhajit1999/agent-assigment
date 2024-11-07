@@ -2,8 +2,8 @@ import asyncio
 import unittest
 import os
 from unittest.mock import patch
-from Agent import Agent 
-from MessageRouter import MessageRouter
+from agent import Agent 
+from message_router import MessageRouter
 class TestAgent(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.agent = Agent("Test Agent")

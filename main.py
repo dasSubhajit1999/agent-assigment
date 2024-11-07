@@ -1,8 +1,9 @@
 import asyncio
-from Agent import Agent
-from MessageRouter import MessageRouter
+from agent import Agent
+from message_router import MessageRouter
 
 async def run_agents():
+
     agent1 = Agent("ALICE")
     agent2 = Agent("BOB")
     router = MessageRouter(agent1, agent2)
