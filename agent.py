@@ -36,13 +36,13 @@ def load_contract_abi(file_path: str):
 bnb_token_abi = load_contract_abi('contracts_abi/bnb_token.json')
 token_contract = web3.eth.contract(address=bnb_token_contract_address, abi=bnb_token_abi)
 token_decimals = token_contract.functions.decimals().call()
-
 class Agent:
     def __init__(self,name):
         self.name = name
         self.inbox = asyncio.Queue()
         self.outbox = asyncio.Queue()
         self.words = ["hello", "sun", "world", "space", "moon", "crypto", "sky", "ocean", "universe","human"]
+
         
         
 
@@ -57,7 +57,7 @@ class Agent:
     async def check_erc20_balance(self):
         while True:
             try:
-                balance = token_contract.functions.balanceOf(SOURCE_ADDRESS).call()
+                balance =await asyncio.to_thread(token_contract.functions.balanceOf(SOURCE_ADDRESS).call)
                 print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} ERC-20 Balance: {balance/ (10 ** token_decimals)} tokens")
             except InvalidAddress:
                 print("Error: The Ethereum address provided is invalid.")
@@ -69,19 +69,28 @@ class Agent:
 
     async def __transferToken(self):
         try:
-            balance = token_contract.functions.balanceOf(SOURCE_ADDRESS).call()
+            print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} Transferring 1 token to {TARGET_ADDRESS}")
+            balance = await asyncio.to_thread(token_contract.functions.balanceOf(SOURCE_ADDRESS).call)
             required_amount = 1 * (10 ** token_decimals)
             if balance >= required_amount:
-                print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} Transferring 1 token to {TARGET_ADDRESS}")
-                tx = token_contract.functions.transfer(TARGET_ADDRESS, required_amount).build_transaction({
+               
+                nonce = await asyncio.to_thread(web3.eth.get_transaction_count, SOURCE_ADDRESS,'pending')
+                tx = await asyncio.to_thread(
+                token_contract.functions.transfer(TARGET_ADDRESS, required_amount).build_transaction,
+                {
                     'from': SOURCE_ADDRESS,
-                    'nonce': web3.eth.get_transaction_count(SOURCE_ADDRESS),
+                    'nonce': nonce,
                     'gas': 2000000,
                     'gasPrice': web3.to_wei('50', 'gwei')
-                })
-                signed_tx = web3.eth.account.sign_transaction(tx, PRIVATE_KEY)
-                tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
+                }
+            )
+               
+                signed_tx = await asyncio.to_thread(web3.eth.account.sign_transaction, tx, PRIVATE_KEY)
+                
+                tx_hash = await asyncio.to_thread(web3.eth.send_raw_transaction, signed_tx.raw_transaction)
+                
                 print(f"{datetime.datetime.now().time()}  ----> Transaction sent: 0x{tx_hash.hex()}")
+               
             else:
                 print(f"{datetime.datetime.now().time()} ----> Insufficient funds to complete the transaction")
         except InvalidAddress:
@@ -96,12 +105,15 @@ class Agent:
     async def handle_messages(self):
         while True:
             message = await self.inbox.get()
-            print(f"{datetime.datetime.now().time()} ----> {self.name} Received message: {message}")
+            asyncio.create_task(self.__process_message(message))
+            await asyncio.sleep(0.2)
 
-            if "hello" in message:
-                 print(f"{datetime.datetime.now().time()} ----> {self.name} Message contains 'hello': {message}")
-            if "crypto" in message:
-                asyncio.create_task(self.__transferToken())
-            await asyncio.sleep(0.5)
+    async def __process_message(self,message):
+        print(f"{datetime.datetime.now().time()} ----> {self.name} Received message: {message}")
+        if "hello" in message:
+            print(f"{datetime.datetime.now().time()} ----> {self.name} Message contains 'hello': {message}")
+        elif "crypto" in message:
+            # Schedule __transferToken to run as a separate task
+            asyncio.create_task(self.__transferToken())
     
 
