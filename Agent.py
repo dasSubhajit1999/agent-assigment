@@ -35,6 +35,7 @@ def load_contract_abi(file_path: str):
 
 bnb_token_abi = load_contract_abi('contracts_abi/bnb_token.json')
 token_contract = web3.eth.contract(address=bnb_token_contract_address, abi=bnb_token_abi)
+token_decimals = token_contract.functions.decimals().call()
 
 class Agent:
     def __init__(self,name):
@@ -58,8 +59,7 @@ class Agent:
             await asyncio.sleep(10)
             try:
                 balance = token_contract.functions.balanceOf(SOURCE_ADDRESS).call()
-                eth_balance = web3.from_wei(balance, 'ether')
-                print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} ERC-20 Balance: {eth_balance} tokens")
+                print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} ERC-20 Balance: {balance/ (10 ** token_decimals)} tokens")
             except InvalidAddress:
                 print("Error: The Ethereum address provided is invalid.")
             except Exception as e:
@@ -70,9 +70,10 @@ class Agent:
     async def __transferToken(self):
         try:
             balance = token_contract.functions.balanceOf(SOURCE_ADDRESS).call()
-            if balance >= web3.to_wei(1, 'ether'):
+            required_amount = 1 * (10 ** token_decimals)
+            if balance >= required_amount:
                 print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} Transferring 1 token to {TARGET_ADDRESS}")
-                tx = token_contract.functions.transfer(TARGET_ADDRESS, web3.to_wei(1, 'ether')).build_transaction({
+                tx = token_contract.functions.transfer(TARGET_ADDRESS, required_amount).build_transaction({
                     'from': SOURCE_ADDRESS,
                     'nonce': web3.eth.get_transaction_count(SOURCE_ADDRESS),
                     'gas': 2000000,
@@ -100,7 +101,7 @@ class Agent:
             if "hello" in message:
                  print(f"{datetime.datetime.now().time()} ----> {self.name} Message contains 'hello': {message}")
             if "crypto" in message:
-                await self.__transferToken()
-            await asyncio.sleep(2)
+                asyncio.create_task(self.__transferToken())
+            await asyncio.sleep(0.5)
     
 
