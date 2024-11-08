@@ -107,7 +107,7 @@ class TestAgentIntegration(unittest.IsolatedAsyncioTestCase):
             'value': 1000000000000000000,
         }
         # giving some time so that process can run
-        await asyncio.sleep(4) 
+        await asyncio.sleep(2) 
 
         #in coming and outgoing messages from queue should be proceed
         self.assertTrue(self.agent1.outbox.empty())
