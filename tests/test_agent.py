@@ -2,8 +2,10 @@ import asyncio
 import unittest
 import os
 from unittest.mock import patch
-from agent import Agent 
-from message_router import MessageRouter
+from src.agent.agent import Agent
+from src.agent.message_router import MessageRouter
+from src.blockchain.blockchain import get_balance,transfer_token
+
 class TestAgent(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.agent = Agent("Test Agent")
@@ -19,11 +21,11 @@ class TestAgent(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.agent.outbox.empty(), "Outbox should contain at least one message")
         
 
-    @patch('blockchain.token_contract')
+    @patch('src.blockchain.blockchain.token_contract')
     async def test_check_erc20_balance(self, mock_token_contract):
         mock_token_contract.functions.balanceOf.return_value.call.return_value = 1000000000000000000
-        token_balance_task = asyncio.create_task(self.agent.check_erc20_balance())
-        await asyncio.sleep(3)  
+        token_balance_task = asyncio.create_task(get_balance(self.SOURCE_ADDRESS))
+        await asyncio.sleep(1)  
         token_balance_task.cancel()
         #for checking token balance the balanceOf function will get invoked once
         mock_token_contract.functions.balanceOf.assert_called_once_with(self.SOURCE_ADDRESS)
@@ -36,9 +38,9 @@ class TestAgent(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.agent.inbox.empty())
         handle_messages_task.cancel()
 
-    @patch('blockchain.token_contract')
-    @patch('blockchain.web3')
-    async def test_handle_messages_crypto(self,mock_web3, mock_token_contract):
+    @patch('src.blockchain.blockchain.token_contract')
+    @patch('src.blockchain.blockchain.web3')
+    async def test_handle_token_transfer(self,mock_web3, mock_token_contract):
         mock_token_contract.functions.balanceOf.return_value.call.return_value = 1000000000000000000
         mock_web3.eth.get_transaction_count.return_value = 1
         mock_web3.to_wei.return_value = 1000000000000000000
@@ -50,12 +52,11 @@ class TestAgent(unittest.IsolatedAsyncioTestCase):
             'gasPrice': 5000000000,
             'value': 1000000000000000000,
         }
-        # inserting the message with crypto word
-        await self.agent.inbox.put("crypto world")
-        handle_messages_task=asyncio.create_task(self.agent.handle_messages())
+       
+        handle_transfer_token_task=asyncio.create_task(transfer_token(self.SOURCE_ADDRESS,self.SOURCE_ADDRESS))
         await asyncio.sleep(1)  
         self.assertTrue(self.agent.inbox.empty())
-        handle_messages_task.cancel()
+        handle_transfer_token_task.cancel()
         # as we have the "crypto" word in the message so the token transfer should get invoked
         mock_token_contract.functions.transfer.assert_called_once()
 
@@ -83,8 +84,8 @@ class TestAgentIntegration(unittest.IsolatedAsyncioTestCase):
         self.router = MessageRouter(self.agent1, self.agent2)
         self.SOURCE_ADDRESS = os.getenv("SOURCE_ADDRESS")
 
-    @patch('blockchain.token_contract')
-    @patch('blockchain.web3')
+    @patch('src.blockchain.blockchain.token_contract')
+    @patch('src.blockchain.blockchain.web3')
     async def test_agent_message_flow(self,mock_web3, mock_token_contract):
         #  agent1 message generation
         message_gen_task = asyncio.create_task(self.agent1.generate_random_messages())

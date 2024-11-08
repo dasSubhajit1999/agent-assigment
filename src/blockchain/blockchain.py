@@ -26,7 +26,7 @@ def load_contract_abi(file_path: str):
     except Exception as e:
         print(f"An unexpected error occurred while loading the ABI: {e}")
 
-bnb_token_abi = load_contract_abi('contracts_abi/bnb_token.json')
+bnb_token_abi = load_contract_abi('contracts/bnb_token.json')
 token_contract = web3.eth.contract(address=bnb_token_contract_address, abi=bnb_token_abi)
 token_decimals = token_contract.functions.decimals().call()
 

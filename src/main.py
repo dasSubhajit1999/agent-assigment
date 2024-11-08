@@ -1,6 +1,6 @@
 import asyncio
 from agent import Agent
-from message_router import MessageRouter
+from agent import MessageRouter
 
 async def run_agents():
 
