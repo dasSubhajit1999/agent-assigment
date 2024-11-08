@@ -80,7 +80,7 @@ This project demonstrates an autonomous agent system where agents communicate as
 To start the agents and the message routing system:
 
 ```bash
-python main.py
+python src/main.py
 ```
 
 - **Agent 1** (named "ALICE") generates random messages every 2 seconds.
@@ -95,12 +95,18 @@ Messages containing **"hello"** print a custom message, while messages containin
 To run the test suite:
 
 ```bash
-python -m unittest test_agent.py
+PYTHONPATH=src python -m unittest discover -s tests
+```
+
+in windows
+
+```bash
+set PYTHONPATH=src && python -m unittest discover -s tests
 ```
 
 ## Code Overview
 
-### Agent.py
+### agent.py
 
 Defines the `Agent` class, which includes:
 
@@ -109,11 +115,18 @@ Defines the `Agent` class, which includes:
 - **\_\_transferToken()**: Transfers 1 token if the balance is sufficient.
 - **handle_messages()**: Processes messages, printing a message if it contains "hello" or triggering a token transfer if it contains "crypto".
 
-### MessageRouter.py
+### message_router.py
 
 Defines the `MessageRouter` class, which facilitates asynchronous message routing between two agents:
 
 - **route_messages()**: Continuously transfers messages from `agent1.outbox` to `agent2.inbox` and vice versa.
+
+### blockchain.py
+
+Defines the blockchain functionality, which includes:
+
+- **get_balance()**: Checks and prints the POLYGON AMOY address's ERC-20 balance every 10 seconds.
+- **\_\transfer_token()**: Transfers 1 token if the balance is sufficient.
 
 ### main.py
 
