@@ -11,10 +11,7 @@ async def run_agents():
         await asyncio.gather(
             router.route_messages(),
             agent1.generate_random_messages(),
-            # agent2.generate_random_messages(),
             agent1.check_erc20_balance(),
-            # agent2.check_erc20_balance(),
-            # agent1.handle_messages(),
             agent2.handle_messages()
         )
     except asyncio.CancelledError:
