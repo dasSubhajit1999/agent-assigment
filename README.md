@@ -1,11 +1,12 @@
 # Agent-Assignment
 
-This project demonstrates an autonomous agent system where agents communicate asynchronously, handle messages, and interact with the POLYGON AMOY blockchain. Each agent can generate random messages, process messages, and perform POLYGON AMOY ERC-20 token transactions based on specific keywords.
+This project demonstrates an autonomous agent system where agents communicate asynchronously, handle messages, and interact with the blockchain. Each agent can generate random messages, process messages, and perform ERC-20 token transactions based on specific keywords.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Prerequisites](#prerequisites)
+- [CLI-Execution-Image](#cli-execution-image)
 - [Setup Instructions](#setup-instructions)
 - [Running the Project](#running-the-project)
 - [Testing](#testing)
@@ -19,10 +20,14 @@ This project demonstrates an autonomous agent system where agents communicate as
 - **Message Handling**: Agent 2 listens to messages, performs actions if they contain specific keywords:
   - **"hello"**: Prints a message containing "hello".
   - **"crypto"**: Initiates an ERC-20 token transfer if the balance is sufficient.
-- **POLYGON AMOY Interaction**: Agent 2 can check ERC-20 token balance and perform token transfers using Web3.
+- **Blockchain Interaction**: Agent 2 can check ERC-20 token balance and perform token transfers using Web3.
 - **Message Routing**: A `MessageRouter` routes messages between Agent 1 and Agent 2.
 
 ---
+
+## CLI-Execution-Image
+
+[![cli-execution.png](https://i.postimg.cc/Y9VD85j4/Screenshot-from-2024-11-14-14-27-45.png)](https://postimg.cc/vgrvZSrM)
 
 ### Prerequisites
 
@@ -73,7 +78,7 @@ This project demonstrates an autonomous agent system where agents communicate as
      ```
 
 7. **Add Your Keys to the `.env` File**:
-   - Open the `.env` file and replace placeholder values with your actual keys, including `AMOY_RPC_URL`, `SOURCE_ADDRESS`, `TARGET_ADDRESS`, `PRIVATE_KEY`, and `BNB_TOKEN_CONTRACT_ADDRESS`.
+   - Open the `.env` file and replace placeholder values with your actual keys, including `RPC_URL`, `SOURCE_ADDRESS`, `TARGET_ADDRESS`, `PRIVATE_KEY`, and `TOKEN_CONTRACT_ADDRESS`.
 
 ## Running the Project
 
@@ -104,6 +109,12 @@ in windows
 set PYTHONPATH=src && python -m unittest discover -s tests
 ```
 
+8. **deactivate the Virtual Environment**:
+
+   ```bash
+   deactivate agentenv/
+   ```
+
 ## Code Overview
 
 ### agent.py
@@ -111,7 +122,7 @@ set PYTHONPATH=src && python -m unittest discover -s tests
 Defines the `Agent` class, which includes:
 
 - **generate_random_messages()**: Generates random messages every 2 seconds.
-- **check_erc20_balance()**: Checks and prints the POLYGON AMOY address's ERC-20 balance every 10 seconds.
+- **check_erc20_balance()**: Checks and prints the blockchain address's ERC-20 balance every 10 seconds.
 - **\_\_transferToken()**: Transfers 1 token if the balance is sufficient.
 - **handle_messages()**: Processes messages, printing a message if it contains "hello" or triggering a token transfer if it contains "crypto".
 
@@ -125,7 +136,7 @@ Defines the `MessageRouter` class, which facilitates asynchronous message routin
 
 Defines the blockchain functionality, which includes:
 
-- **get_balance()**: Checks and prints the POLYGON AMOY address's ERC-20 balance every 10 seconds.
+- **get_balance()**: Checks and prints the blockchain address's ERC-20 balance every 10 seconds.
 - **\_\transfer_token()**: Transfers 1 token if the balance is sufficient.
 
 ### main.py
