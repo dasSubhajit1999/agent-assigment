@@ -53,7 +53,7 @@ This project demonstrates an autonomous agent system where agents communicate as
    python3 -m venv agentenv
    ```
 
-   - If `venv` is not installed, you can install it with:
+   - If `venv` is not installed, you can install it with and then create the venv with above command:
      ```bash
      sudo apt install python3-venv
      ```
