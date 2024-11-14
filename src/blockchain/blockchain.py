@@ -9,11 +9,11 @@ import os
 load_dotenv()
 
 
-AMOY_RPC_URL = os.getenv("AMOY_RPC_URL")
+RPC_URL = os.getenv("RPC_URL")
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
-bnb_token_contract_address = os.getenv("BNB_TOKEN_CONTRACT_ADDRESS")
+TOKEN_CONTRACT_ADDRESS = os.getenv("TOKEN_CONTRACT_ADDRESS")
 
-web3 = Web3(Web3.HTTPProvider(AMOY_RPC_URL))
+web3 = Web3(Web3.HTTPProvider(RPC_URL))
 
 def load_contract_abi(file_path: str):
     try:
@@ -26,8 +26,8 @@ def load_contract_abi(file_path: str):
     except Exception as e:
         print(f"An unexpected error occurred while loading the ABI: {e}")
 
-bnb_token_abi = load_contract_abi('contracts/bnb_token.json')
-token_contract = web3.eth.contract(address=bnb_token_contract_address, abi=bnb_token_abi)
+erc20_token_abi = load_contract_abi('contracts/erc20_token.json')
+token_contract = web3.eth.contract(address=TOKEN_CONTRACT_ADDRESS, abi=erc20_token_abi)
 token_decimals = token_contract.functions.decimals().call()
 
 
@@ -43,7 +43,7 @@ async def get_balance(SOURCE_ADDRESS):
 
 async def transfer_token(SOURCE_ADDRESS,TARGET_ADDRESS):
     try:
-        print(f"{datetime.datetime.now().time()} ----> {SOURCE_ADDRESS} Transferring 1 token to {TARGET_ADDRESS}")
+        print(f"{datetime.datetime.now().time()} ----> 🕥 {SOURCE_ADDRESS} Transferring 1 token to {TARGET_ADDRESS}")
         balance = await asyncio.to_thread(token_contract.functions.balanceOf(SOURCE_ADDRESS).call)
         required_amount = 1 * (10 ** token_decimals)
         if balance >= required_amount:
@@ -63,10 +63,10 @@ async def transfer_token(SOURCE_ADDRESS,TARGET_ADDRESS):
             
             tx_hash = await asyncio.to_thread(web3.eth.send_raw_transaction, signed_tx.raw_transaction)
             
-            print(f"{datetime.datetime.now().time()}  ----> Transaction sent: 0x{tx_hash.hex()}")
+            print(f"{datetime.datetime.now().time()}  ----> ⚡ Transaction sent: 0x{tx_hash.hex()}")
             
         else:
-            print(f"{datetime.datetime.now().time()} ----> Insufficient funds to complete the transaction")
+            print(f"{datetime.datetime.now().time()} ----> 😥 Insufficient funds to complete the transaction")
     except InvalidAddress:
         print("Error: One of the Ethereum addresses provided is invalid.")
     except ValueError as e:
